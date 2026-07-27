@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel · Visión 2030 · Instituto Nacional de Cancerología</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --navy:#050d1f; --teal:#00b7a8; --teal2:#19d3c5; --gold:#ffb23e;
@@ -56,6 +57,10 @@
   .modal h2{font-size:2.1rem;font-weight:900;margin:6px 0 20px;letter-spacing:-.02em}
   #visionOut{font-size:1.32rem;line-height:1.65;white-space:pre-wrap}
   #visionOut strong{color:var(--gold)}
+  .visqr{display:flex;gap:16px;align-items:center;margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .visqr img{width:118px;height:118px;background:#fff;border-radius:10px;padding:6px;flex:0 0 auto}
+  .visqr b{display:block;font-size:1.05rem;margin-bottom:4px}
+  .visqr span{color:var(--muted);font-size:.88rem}
   .keybox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:10px}
   .keybox input{width:100%;background:rgba(255,255,255,.06);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;color:#fff;font-size:.95rem;margin:10px 0;font-family:inherit}
   .keybox a{color:var(--teal2)}
@@ -109,6 +114,7 @@
     </div>
   </div>
 
+<canvas id="vcanvas" width="1240" height="1754" style="display:none"></canvas>
 <script>
 const SB_URL="https://nvgkhdrrxqdgxktfkioa.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z2toZHJyeHFkZ3hrdGZraW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzY4MjYsImV4cCI6MjA5MzQxMjgyNn0.mikJZpOf6pIupH1w_hFlMIzCoOMB-wJCMJHyP46YLeg";
@@ -190,8 +196,15 @@ async function generate(){
   const prompt="Somos la Alta Dirección del Instituto Nacional de Cancerología, graduados de un diplomado en IA. Sintetiza NUESTRAS respuestas en una 'Visión 2030' colectiva de máximo 160 palabras, en 2do plural ('nos vemos', 'lideraremos'). Estructura en 3 párrafos cortos con estos encabezados en negrita markdown: **Cómo nos vemos en 2030**, **Cómo lideramos a nuestros equipos con IA**, **Nuestro primer paso**. Sé concreto y digno de leerse en voz alta.\n\nVISIONES DE FUTURO: "+futuros+"\n\nFORMAS DE LIDERAR: "+lider+"\n\nPRIMEROS PASOS: "+pasos;
   try{
     const md=await callGemini(prompt,sys);
+    lastVision=md;
+    renderVisionCanvas(md);
+    saveVisionFinal(md, data.length);
     body.innerHTML='<div id="visionOut">'+mdToHtml(md)+'</div>'+
-      '<div style="display:flex;gap:12px;margin-top:24px"><button class="btn btn-ghost" onclick="generate()">↻ Regenerar</button><button class="btn btn-gold" onclick="closeVision()">Cerrar</button></div>';
+      '<div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap">'+
+        '<button class="btn btn-gold" style="flex:1;min-width:180px" onclick="dlVisionPdf()">⬇ Descargar PDF</button>'+
+        '<button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="generate()">↻ Regenerar</button>'+
+      '</div>'+
+      '<div class="visqr"><img src="data:image/png;base64,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" alt="QR"><div><b>Escanea para llevarte la Visión 2030</b><span>La sala la descarga en imagen o PDF desde su celular.</span></div></div>';
   }catch(e){
     body.innerHTML='<p style="color:#ffb3ba">'+ (e.msg||"Error") +'</p>'+
       (e.fatal? '<button class="btn btn-ghost" style="margin-top:14px" onclick="localStorage.removeItem(\'icone_gemini_key\');openVision()">Cambiar clave</button>':'<button class="btn btn-gold" style="margin-top:14px" onclick="generate()">Reintentar</button>');
@@ -199,6 +212,54 @@ async function generate(){
 }
 function mdToHtml(md){
   return esc(md).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\n{2,}/g,'</p><p style="margin-top:16px">').replace(/^/,'<p>').replace(/$/,'</p>');
+}
+
+/* ===== VISIÓN FINAL: guardar + render + PDF ===== */
+let lastVision="", visionDataURL="";
+async function saveVisionFinal(texto,n){
+  try{
+    await fetch(SB_URL+"/rest/v1/vision_final",{method:"POST",
+      headers:{"Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=minimal"},
+      body:JSON.stringify({evento:EVENTO,texto:texto,n_lideres:n})});
+  }catch(e){}
+}
+function vwrap(ctx,text,x,y,maxW,lh){
+  const words=(text||"").split(/\s+/);let line="",yy=y;
+  for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,yy);line=w;yy+=lh;}else line=t;}
+  if(line){ctx.fillText(line,x,yy);yy+=lh;}return yy;
+}
+function renderVisionCanvas(text){
+  const c=document.getElementById('vcanvas'),x=c.getContext('2d'),W=1240,H=1754;
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#071531');g.addColorStop(1,'#04101f');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  const gg=x.createRadialGradient(W*0.75,120,40,W*0.75,120,700);gg.addColorStop(0,'rgba(0,183,168,.26)');gg.addColorStop(1,'rgba(0,183,168,0)');
+  x.fillStyle=gg;x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(255,255,255,.1)';x.lineWidth=2;x.strokeRect(30,30,W-60,H-60);
+  x.textBaseline='top';
+  x.fillStyle='#19d3c5';x.font='700 28px Inter,Arial,sans-serif';x.fillText('VISIÓN COLECTIVA DE LA ALTA DIRECCIÓN',80,86);
+  x.fillStyle='#fff';x.font='800 62px Inter,Arial,sans-serif';x.fillText('Instituto Nacional',80,132);x.fillText('de Cancerología',80,200);
+  const grad=x.createLinearGradient(80,0,520,0);grad.addColorStop(0,'#19d3c5');grad.addColorStop(1,'#ffb23e');
+  x.fillStyle=grad;x.font='900 96px Inter,Arial,sans-serif';x.fillText('2030',80,272);
+  x.strokeStyle='rgba(255,178,62,.55)';x.lineWidth=3;x.beginPath();x.moveTo(80,400);x.lineTo(W-80,400);x.stroke();
+  let y=444;const maxW=W-160;
+  (text||"").replace(/\r/g,'').split(/\n+/).map(s=>s.trim()).filter(Boolean).forEach(seg=>{
+    const hm=seg.match(/^\*\*(.+?)\*\*[:：]?\s*(.*)$/);
+    if(hm){x.fillStyle='#ffb23e';x.font='700 34px Inter,Arial,sans-serif';y=vwrap(x,hm[1],80,y+10,maxW,44)+6;
+      if(hm[2]){x.fillStyle='#e8eef5';x.font='400 33px Inter,Arial,sans-serif';y=vwrap(x,hm[2].replace(/\*\*/g,''),80,y,maxW,46)+18;}}
+    else{x.fillStyle='#e8eef5';x.font='400 33px Inter,Arial,sans-serif';y=vwrap(x,seg.replace(/\*\*/g,''),80,y,maxW,46)+18;}
+  });
+  x.fillStyle='rgba(255,255,255,.45)';x.font='500 24px Inter,Arial,sans-serif';x.fillText('Del aprendizaje a la transformación · una visión de futuro con IA',80,H-118);
+  x.fillStyle='#19d3c5';x.font='700 24px Inter,Arial,sans-serif';x.fillText('Universidad EAN  ×  Instituto Nacional de Cancerología · 2026',80,H-80);
+  visionDataURL=c.toDataURL('image/png');
+}
+function dlVisionPdf(){
+  try{
+    if(!visionDataURL) renderVisionCanvas(lastVision);
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:[595,842]});
+    pdf.addImage(visionDataURL,'PNG',0,0,595,842);
+    pdf.save('Vision-2030-Instituto-Cancerologia.pdf');
+  }catch(e){ if(visionDataURL) window.open(visionDataURL,'_blank'); }
 }
 
 poll();setInterval(poll,4000);

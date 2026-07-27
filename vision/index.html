@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visión 2030 · Instituto Nacional de Cancerología</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{--navy:#050d1f;--teal:#00b7a8;--teal2:#19d3c5;--gold:#ffb23e;--muted:rgba(255,255,255,.62);--line:rgba(255,255,255,.12)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1200px 600px at 50% -10%,#0d2444 0%,var(--navy) 55%);color:#fff;
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+  .wrap{max-width:560px;margin:0 auto;padding:22px 18px 60px;text-align:center}
+  .brandbar{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:16px}
+  .brandbar .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brandbar span{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .grad{background:linear-gradient(120deg,var(--teal2),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  h1{font-size:1.5rem;font-weight:800;margin-bottom:6px}
+  p.sub{color:var(--muted);font-size:.92rem;margin-bottom:16px}
+  #visImg{width:100%;border-radius:16px;border:1px solid var(--line);display:none;margin:14px 0;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  canvas{display:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:none;border-radius:13px;
+    padding:15px 18px;font-size:1rem;font-weight:700;cursor:pointer;transition:.18s;font-family:inherit;margin-top:10px}
+  .btn-primary{background:linear-gradient(120deg,var(--teal),#0a9f93);color:#00170f;box-shadow:0 8px 26px rgba(0,183,168,.28)}
+  .btn-gold{background:linear-gradient(120deg,var(--gold),#ff8c00);color:#241400}
+  .save-note{color:var(--muted);font-size:.84rem;margin-top:10px}
+  .load{color:var(--muted);padding:60px 10px;font-size:1.05rem}
+  .spin{width:26px;height:26px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--teal);border-radius:50%;animation:sp .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .foot{margin-top:26px;color:rgba(255,255,255,.4);font-size:.74rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brandbar"><span class="dot"></span><span>Diplomado en IA · Alta Dirección · EAN</span></div>
+  <h1>La <span class="grad">Visión 2030</span></h1>
+  <p class="sub">Instituto Nacional de Cancerología — construida por su Alta Dirección</p>
+  <div id="status" class="load"><span class="spin"></span>Cargando la visión…</div>
+  <img id="visImg" alt="Visión 2030">
+  <canvas id="c" width="1240" height="1754"></canvas>
+  <div id="actions" style="display:none">
+    <button class="btn btn-primary" onclick="dlImg()">⬇ Descargar imagen</button>
+    <button class="btn btn-gold" onclick="dlPdf()">⬇ Descargar PDF</button>
+    <div class="save-note" id="iosHint" style="display:none">📱 En iPhone: mantén presionada la imagen y toca “Guardar imagen”.</div>
+  </div>
+  <div class="foot">Del aprendizaje a la transformación · Universidad EAN × Instituto Nacional de Cancerología · 2026</div>
+</div>
+<script>
+const SB_URL="https://nvgkhdrrxqdgxktfkioa.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z2toZHJyeHFkZ3hrdGZraW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzY4MjYsImV4cCI6MjA5MzQxMjgyNn0.mikJZpOf6pIupH1w_hFlMIzCoOMB-wJCMJHyP46YLeg";
+const EVENTO="incancerologico-ean-2026";
+let dataURL="";
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
+function wrap(ctx,text,x,y,maxW,lh){
+  const words=(text||"").split(/\s+/);let line="",yy=y;
+  for(const w of words){const t=line?line+" "+w:w;if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,yy);line=w;yy+=lh;}else line=t;}
+  if(line){ctx.fillText(line,x,yy);yy+=lh;}
+  return yy;
+}
+function renderVision(text){
+  const c=document.getElementById('c'),x=c.getContext('2d'),W=1240,H=1754;
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#071531');g.addColorStop(1,'#04101f');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  const gg=x.createRadialGradient(W*0.75,120,40,W*0.75,120,700);gg.addColorStop(0,'rgba(0,183,168,.26)');gg.addColorStop(1,'rgba(0,183,168,0)');
+  x.fillStyle=gg;x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(255,255,255,.1)';x.lineWidth=2;x.strokeRect(30,30,W-60,H-60);
+  x.textBaseline='top';
+  x.fillStyle='#19d3c5';x.font='700 28px Inter,Arial,sans-serif';
+  x.fillText('VISIÓN COLECTIVA DE LA ALTA DIRECCIÓN',80,86);
+  x.fillStyle='#fff';x.font='800 62px Inter,Arial,sans-serif';
+  x.fillText('Instituto Nacional',80,132);x.fillText('de Cancerología',80,200);
+  const grad=x.createLinearGradient(80,0,520,0);grad.addColorStop(0,'#19d3c5');grad.addColorStop(1,'#ffb23e');
+  x.fillStyle=grad;x.font='900 96px Inter,Arial,sans-serif';x.fillText('2030',80,272);
+  x.strokeStyle='rgba(255,178,62,.55)';x.lineWidth=3;x.beginPath();x.moveTo(80,400);x.lineTo(W-80,400);x.stroke();
+  // body: parse markdown-ish (** bold ** headers)
+  let y=444;const maxW=W-160;
+  const parts=text.replace(/\r/g,'').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+  parts.forEach(seg=>{
+    const hm=seg.match(/^\*\*(.+?)\*\*[:：]?\s*(.*)$/);
+    if(hm){
+      x.fillStyle='#ffb23e';x.font='700 34px Inter,Arial,sans-serif';
+      y=wrap(x,hm[1],80,y+10,maxW,44)+6;
+      if(hm[2]){x.fillStyle='#e8eef5';x.font='400 33px Inter,Arial,sans-serif';y=wrap(x,hm[2].replace(/\*\*/g,''),80,y,maxW,46)+18;}
+    }else{
+      x.fillStyle='#e8eef5';x.font='400 33px Inter,Arial,sans-serif';
+      y=wrap(x,seg.replace(/\*\*/g,''),80,y,maxW,46)+18;
+    }
+  });
+  x.fillStyle='rgba(255,255,255,.45)';x.font='500 24px Inter,Arial,sans-serif';
+  x.fillText('Del aprendizaje a la transformación · una visión de futuro con IA',80,H-118);
+  x.fillStyle='#19d3c5';x.font='700 24px Inter,Arial,sans-serif';
+  x.fillText('Universidad EAN  ×  Instituto Nacional de Cancerología · 2026',80,H-80);
+  dataURL=c.toDataURL('image/png');
+  const img=document.getElementById('visImg');img.src=dataURL;img.style.display='block';
+  document.getElementById('actions').style.display='block';
+  document.getElementById('iosHint').style.display=isIOS?'block':'none';
+  document.getElementById('status').style.display='none';
+}
+function dlImg(){
+  if(isIOS){window.open(dataURL,'_blank');document.getElementById('iosHint').style.display='block';return;}
+  const a=document.createElement('a');a.download='Vision-2030-Instituto-Cancerologia.png';a.href=dataURL;document.body.appendChild(a);a.click();a.remove();
+}
+function dlPdf(){
+  try{
+    const {jsPDF}=window.jspdf;const c=document.getElementById('c');
+    const pdf=new jsPDF({orientation:'portrait',unit:'pt',format:[595,842]});
+    pdf.addImage(dataURL,'PNG',0,0,595,842);
+    pdf.save('Vision-2030-Instituto-Cancerologia.pdf');
+  }catch(e){ dlImg(); }
+}
+async function load(){
+  try{
+    const r=await fetch(SB_URL+"/rest/v1/vision_final?evento=eq."+EVENTO+"&select=texto&order=created_at.desc&limit=1",
+      {headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY}});
+    const d=await r.json();
+    if(d&&d.length&&d[0].texto){renderVision(d[0].texto);}
+    else{document.getElementById('status').innerHTML='La Visión 2030 aún no ha sido generada. Vuelve a escanear en unos minutos. 🔄';}
+  }catch(e){document.getElementById('status').innerHTML='No se pudo cargar la visión. Revisa tu conexión e intenta de nuevo.';}
+}
+load();
+</script>
+</body>
+</html>
