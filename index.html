@@ -131,11 +131,13 @@
   <section id="v-done" class="view">
     <div class="done-emoji">🚀</div>
     <div class="hero" style="margin-top:8px">
-      <h1 style="font-size:1.5rem">Tu <span class="grad">Hoja de Ruta 2030</span></h1>
-      <p style="font-size:.92rem;margin-top:8px">Descárgala o guárdala. Es tu compromiso con la transformación de tu equipo.</p>
+      <h1 style="font-size:1.5rem">Tu <span class="grad">compromiso 2030</span></h1>
+      <p style="font-size:.92rem;margin-top:8px">Esta es tu Hoja de Ruta. <b>Descárgala y guárdala en tu celular</b> — es tu compromiso con la transformación de tu equipo.</p>
     </div>
-    <canvas id="cardCanvas" width="1080" height="1350"></canvas>
-    <button class="btn btn-primary" id="dlBtn" onclick="downloadCard()">⬇ Descargar mi Hoja de Ruta</button>
+    <canvas id="cardCanvas" width="1080" height="1350" style="display:none"></canvas>
+    <img id="cardImg" alt="Tu Hoja de Ruta 2030" style="width:100%;border-radius:16px;border:1px solid var(--line);display:block;margin:14px 0;box-shadow:0 20px 50px rgba(0,0,0,.4)">
+    <button class="btn btn-primary" id="dlBtn" onclick="downloadCard()">⬇ Guardar mi Hoja de Ruta en el celular</button>
+    <div class="save-note" id="iosHint" style="display:none">📱 En iPhone: mantén presionada la imagen de arriba y toca <b>“Guardar imagen”</b> (o “Añadir a Fotos”).</div>
     <div class="save-note">Tu respuesta ya viaja a la pantalla del salón. ✨</div>
   </section>
 
@@ -193,9 +195,15 @@ function nextQ(){
   else{ finish(); }
 }
 
+let cardDataURL="";
 async function finish(){
   // Render card immediately (no dependency on network)
   drawCard();
+  cardDataURL=document.getElementById('cardCanvas').toDataURL('image/png');
+  document.getElementById('cardImg').src=cardDataURL;
+  // iOS: canvas download is unreliable → show long-press hint
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  document.getElementById('iosHint').style.display=isIOS?'block':'none';
   show('v-done');
   // Save to Supabase in background (fire and forget with retry)
   saveResponse();
@@ -272,10 +280,17 @@ function drawCard(){
   x.fillText('Universidad EAN  ×  Instituto Nacional de Cancerología',70,H-60);
 }
 function downloadCard(){
-  const c=document.getElementById('cardCanvas');
+  const url=cardDataURL||document.getElementById('cardCanvas').toDataURL('image/png');
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(isIOS){
+    // iOS ignores the download attribute; open the image so the user can save it to Fotos
+    window.open(url,'_blank');
+    document.getElementById('iosHint').style.display='block';
+    return;
+  }
   const a=document.createElement('a');
   a.download='Hoja-de-Ruta-2030-'+(state.nombre||'directivo').replace(/\s+/g,'-')+'.png';
-  a.href=c.toDataURL('image/png');a.click();
+  a.href=url;document.body.appendChild(a);a.click();a.remove();
 }
 </script>
 </body>
