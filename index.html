@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Visión 2030 · Instituto Nacional de Cancerología</title>
+<style>
+  :root{
+    --navy:#050d1f; --navy2:#0a1730; --teal:#00b7a8; --teal2:#19d3c5;
+    --gold:#ffb23e; --white:#ffffff; --muted:rgba(255,255,255,.62);
+    --line:rgba(255,255,255,.12); --card:rgba(255,255,255,.05);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #0d2444 0%, var(--navy) 55%);
+    color:var(--white); font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased; line-height:1.5;
+  }
+  .wrap{max-width:520px;margin:0 auto;padding:22px 18px 60px;min-height:100vh;display:flex;flex-direction:column}
+  .brandbar{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:6px}
+  .brandbar .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px var(--teal)}
+  .brandbar span{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .grad{background:linear-gradient(120deg,var(--teal2),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .view{display:none;animation:fade .45s ease}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+  /* INTRO */
+  .hero{text-align:center;margin-top:18px}
+  .hero .eyebrow{font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--teal2);font-weight:700;margin-bottom:14px}
+  .hero h1{font-size:2rem;font-weight:800;line-height:1.12;letter-spacing:-.02em;margin-bottom:12px}
+  .hero p{color:var(--muted);font-size:1rem;max-width:440px;margin:0 auto}
+  .yr{display:inline-block;font-weight:900;font-size:3.4rem;line-height:1;margin:20px 0 6px;letter-spacing:-.03em}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px}
+  .steps3{display:flex;flex-direction:column;gap:12px;margin:22px 0 8px;text-align:left}
+  .st{display:flex;gap:13px;align-items:flex-start}
+  .st .n{flex:0 0 30px;height:30px;border-radius:9px;background:rgba(0,183,168,.16);border:1px solid rgba(0,183,168,.4);color:var(--teal2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem}
+  .st b{display:block;font-size:.96rem;margin-bottom:1px}
+  .st small{color:var(--muted);font-size:.85rem}
+
+  label.fld{display:block;font-size:.9rem;font-weight:600;margin:0 0 7px}
+  label.fld em{color:var(--teal2);font-style:normal}
+  .hint{color:var(--muted);font-size:.82rem;margin:-2px 0 12px}
+  input.ic,textarea.ic{
+    width:100%;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.16);
+    border-radius:12px;padding:14px 15px;color:#fff;font-size:1rem;font-family:inherit;transition:.18s;outline:none;resize:vertical
+  }
+  input.ic:focus,textarea.ic:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,183,168,.16)}
+  input.ic::placeholder,textarea.ic::placeholder{color:rgba(255,255,255,.32)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .qbadge{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+  .qtitle{font-size:1.18rem;font-weight:800;line-height:1.2;margin-bottom:14px;letter-spacing:-.01em}
+  .prog{display:flex;gap:6px;margin:2px 0 20px}
+  .prog i{height:5px;border-radius:5px;flex:1;background:rgba(255,255,255,.12)}
+  .prog i.on{background:linear-gradient(90deg,var(--teal),var(--gold))}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;
+    border:none;border-radius:13px;padding:15px 18px;font-size:1rem;font-weight:700;cursor:pointer;transition:.18s;font-family:inherit}
+  .btn-primary{background:linear-gradient(120deg,var(--teal),#0a9f93);color:#00170f;box-shadow:0 8px 26px rgba(0,183,168,.28)}
+  .btn-primary:hover{transform:translateY(-1px)}
+  .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .btn-ghost{background:transparent;border:1.5px solid var(--line);color:#fff}
+  .btnrow{display:flex;gap:10px;margin-top:18px}
+  .btnrow .btn{width:auto;flex:1}
+  .charc{text-align:right;font-size:.76rem;color:var(--muted);margin-top:6px}
+
+  /* CARD RESULT */
+  .done-emoji{font-size:2.6rem;text-align:center}
+  #cardCanvas{width:100%;border-radius:16px;border:1px solid var(--line);display:block;margin:14px 0;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+  .save-note{color:var(--muted);font-size:.84rem;text-align:center;margin-top:4px}
+  .spin{width:22px;height:22px;border:3px solid rgba(0,23,15,.35);border-top-color:#00170f;border-radius:50%;animation:sp .7s linear infinite;display:inline-block}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .foot{margin-top:auto;padding-top:26px;text-align:center;color:rgba(255,255,255,.4);font-size:.74rem;letter-spacing:.02em}
+  .err{background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.4);color:#ffb3ba;border-radius:11px;padding:12px 14px;font-size:.88rem;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brandbar"><span class="dot"></span><span>Diplomado en IA · Alta Dirección · EAN</span></div>
+
+  <!-- ===== INTRO ===== -->
+  <section id="v-intro" class="view active">
+    <div class="hero">
+      <div class="eyebrow">Instituto Nacional de Cancerología</div>
+      <h1>Construyamos la <span class="grad">visión 2030</span></h1>
+      <div class="yr grad">2030</div>
+      <p>Tú lideraste tu aprendizaje. Hoy conviertes ese aprendizaje en la transformación de tu equipo. Responde 3 preguntas y llévate tu Hoja de Ruta.</p>
+    </div>
+    <div class="steps3">
+      <div class="st"><div class="n">1</div><div><b>El futuro</b><small>Cómo quieres ver al Instituto en 2030.</small></div></div>
+      <div class="st"><div class="n">2</div><div><b>Tu liderazgo con IA</b><small>Cómo vas a apoyar a tu equipo.</small></div></div>
+      <div class="st"><div class="n">3</div><div><b>El primer paso</b><small>El primer reto que resolverás con IA.</small></div></div>
+    </div>
+    <div style="margin-top:20px">
+      <label class="fld" for="i-nombre">Tu nombre</label>
+      <input class="ic" id="i-nombre" placeholder="Nombre y apellido" autocomplete="name">
+      <div style="height:12px"></div>
+      <div class="row2">
+        <div>
+          <label class="fld" for="i-cargo">Cargo</label>
+          <input class="ic" id="i-cargo" placeholder="Ej. Jefe de área">
+        </div>
+        <div>
+          <label class="fld" for="i-area">Área / Dependencia</label>
+          <input class="ic" id="i-area" placeholder="Ej. Financiera">
+        </div>
+      </div>
+      <div class="btnrow" style="margin-top:20px">
+        <button class="btn btn-primary" onclick="startFlow()">Comenzar &rarr;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUESTIONS ===== -->
+  <section id="v-q" class="view">
+    <div class="prog"><i id="p0"></i><i id="p1"></i><i id="p2"></i></div>
+    <div class="qhead"><span class="qbadge" id="q-badge">Pregunta 1 de 3</span></div>
+    <div class="qtitle" id="q-title"></div>
+    <textarea class="ic" id="q-input" rows="5" maxlength="600" placeholder=""></textarea>
+    <div class="charc"><span id="q-count">0</span>/600</div>
+    <div class="btnrow">
+      <button class="btn btn-ghost" id="q-back" onclick="prevQ()">Volver</button>
+      <button class="btn btn-primary" id="q-next" onclick="nextQ()">Siguiente &rarr;</button>
+    </div>
+    <div class="err" id="q-err"></div>
+  </section>
+
+  <!-- ===== RESULT ===== -->
+  <section id="v-done" class="view">
+    <div class="done-emoji">🚀</div>
+    <div class="hero" style="margin-top:8px">
+      <h1 style="font-size:1.5rem">Tu <span class="grad">Hoja de Ruta 2030</span></h1>
+      <p style="font-size:.92rem;margin-top:8px">Descárgala o guárdala. Es tu compromiso con la transformación de tu equipo.</p>
+    </div>
+    <canvas id="cardCanvas" width="1080" height="1350"></canvas>
+    <button class="btn btn-primary" id="dlBtn" onclick="downloadCard()">⬇ Descargar mi Hoja de Ruta</button>
+    <div class="save-note">Tu respuesta ya viaja a la pantalla del salón. ✨</div>
+  </section>
+
+  <div class="foot">Universidad EAN · Instituto Nacional de Cancerología — 2026</div>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const SB_URL="https://nvgkhdrrxqdgxktfkioa.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im52Z2toZHJyeHFkZ3hrdGZraW9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4MzY4MjYsImV4cCI6MjA5MzQxMjgyNn0.mikJZpOf6pIupH1w_hFlMIzCoOMB-wJCMJHyP46YLeg";
+const EVENTO="incancerologico-ean-2026";
+
+const QS=[
+  {badge:"Pregunta 1 de 3", title:"¿Cómo quieres ver al Instituto Nacional de Cancerología en 2030?",
+   ph:"Imagina la institución dentro de 5 años. ¿Qué la hace diferente? ¿Qué logró?"},
+  {badge:"Pregunta 2 de 3", title:"Como líder, ¿cómo vas a apoyar a tu equipo con IA para llegar ahí?",
+   ph:"Tu rol: ¿cómo acompañas, habilitas o impulsas a tu equipo para que use IA?"},
+  {badge:"Pregunta 3 de 3", title:"¿Cuál es el primer reto o tarea que tu equipo debería resolver con IA?",
+   ph:"El primer paso concreto. Un reto o tarea real donde la IA empieza a ahorrar tiempo."}
+];
+
+const state={ nombre:"",cargo:"",area:"", answers:["","",""], q:0, saved:false };
+
+function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+function startFlow(){
+  state.nombre=document.getElementById('i-nombre').value.trim();
+  state.cargo=document.getElementById('i-cargo').value.trim();
+  state.area=document.getElementById('i-area').value.trim();
+  if(!state.nombre){document.getElementById('i-nombre').focus();document.getElementById('i-nombre').style.borderColor='#ff4757';return;}
+  state.q=0; renderQ(); show('v-q');
+}
+function renderQ(){
+  const q=QS[state.q];
+  document.getElementById('q-badge').textContent=q.badge;
+  document.getElementById('q-title').textContent=q.title;
+  const inp=document.getElementById('q-input');
+  inp.placeholder=q.ph; inp.value=state.answers[state.q]||"";
+  document.getElementById('q-count').textContent=inp.value.length;
+  for(let i=0;i<3;i++){document.getElementById('p'+i).classList.toggle('on', i<=state.q);}
+  document.getElementById('q-back').style.visibility = state.q===0 ? 'hidden':'visible';
+  document.getElementById('q-next').innerHTML = state.q===2 ? 'Crear mi Hoja de Ruta ✨' : 'Siguiente &rarr;';
+  document.getElementById('q-err').style.display='none';
+  inp.focus();
+}
+document.getElementById('q-input').addEventListener('input',e=>{
+  state.answers[state.q]=e.target.value;
+  document.getElementById('q-count').textContent=e.target.value.length;
+});
+function prevQ(){ if(state.q>0){state.q--;renderQ();} }
+function nextQ(){
+  const val=(state.answers[state.q]||"").trim();
+  if(val.length<3){const el=document.getElementById('q-err');el.textContent="Escribe tu respuesta para continuar.";el.style.display='block';return;}
+  if(state.q<2){state.q++;renderQ();}
+  else{ finish(); }
+}
+
+async function finish(){
+  // Render card immediately (no dependency on network)
+  drawCard();
+  show('v-done');
+  // Save to Supabase in background (fire and forget with retry)
+  saveResponse();
+}
+
+async function saveResponse(){
+  if(state.saved) return;
+  const payload={ evento:EVENTO, nombre:state.nombre, cargo:state.cargo, area:state.area,
+    q1_futuro:state.answers[0], q2_liderazgo:state.answers[1], q3_primerpaso:state.answers[2] };
+  try{
+    const res=await fetch(SB_URL+"/rest/v1/vision_2030",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json","apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Prefer":"return=minimal" },
+      body:JSON.stringify(payload)
+    });
+    if(res.ok){ state.saved=true; }
+    else { setTimeout(saveResponse,3000); }
+  }catch(e){ setTimeout(saveResponse,3000); }
+}
+
+/* ===== CANVAS CARD ===== */
+function wrap(ctx,text,x,y,maxW,lh,maxLines){
+  const words=(text||"").split(/\s+/); let line="",lines=[];
+  for(let w of words){const t=line?line+" "+w:w; if(ctx.measureText(t).width>maxW && line){lines.push(line);line=w;}else line=t;}
+  if(line)lines.push(line);
+  if(maxLines&&lines.length>maxLines){lines=lines.slice(0,maxLines);lines[maxLines-1]=lines[maxLines-1].replace(/.{1}$/,'…');}
+  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));
+  return y+lines.length*lh;
+}
+function drawCard(){
+  const c=document.getElementById('cardCanvas'),x=c.getContext('2d');
+  const W=1080,H=1350;
+  // bg
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#071531');g.addColorStop(1,'#04101f');
+  x.fillStyle=g;x.fillRect(0,0,W,H);
+  // teal glow
+  const gg=x.createRadialGradient(W*0.8,120,40,W*0.8,120,600);gg.addColorStop(0,'rgba(0,183,168,.28)');gg.addColorStop(1,'rgba(0,183,168,0)');
+  x.fillStyle=gg;x.fillRect(0,0,W,H);
+  // border
+  x.strokeStyle='rgba(255,255,255,.10)';x.lineWidth=2;x.strokeRect(28,28,W-56,H-56);
+  // header
+  x.textBaseline='top';
+  x.fillStyle='#19d3c5';x.font='700 26px Inter,sans-serif';
+  x.fillText('DIPLOMADO EN IA · ALTA DIRECCIÓN · UNIVERSIDAD EAN',70,74);
+  x.fillStyle='#ffffff';x.font='800 76px Inter,sans-serif';
+  x.fillText('Hoja de Ruta',70,120);
+  const grad=x.createLinearGradient(70,0,760,0);grad.addColorStop(0,'#19d3c5');grad.addColorStop(1,'#ffb23e');
+  x.fillStyle=grad;x.font='900 132px Inter,sans-serif';x.fillText('2030',70,196);
+  // name block
+  x.fillStyle='#ffffff';x.font='800 46px Inter,sans-serif';
+  x.fillText((state.nombre||'').toUpperCase(),70,372);
+  x.fillStyle='rgba(255,255,255,.6)';x.font='500 30px Inter,sans-serif';
+  let sub=[state.cargo,state.area].filter(Boolean).join('  ·  ');
+  x.fillText(sub||'Instituto Nacional de Cancerología',70,430);
+  // divider
+  x.strokeStyle='rgba(255,178,62,.5)';x.lineWidth=3;x.beginPath();x.moveTo(70,494);x.lineTo(1010,494);x.stroke();
+  // 3 blocks
+  const blocks=[
+    {t:'MI VISIÓN 2030',a:state.answers[0],col:'#19d3c5'},
+    {t:'CÓMO LIDERO CON IA',a:state.answers[1],col:'#19d3c5'},
+    {t:'MI PRIMER PASO',a:state.answers[2],col:'#ffb23e'}
+  ];
+  let y=534;
+  blocks.forEach(b=>{
+    x.fillStyle=b.col;x.font='700 27px Inter,sans-serif';x.fillText(b.t,70,y);
+    x.fillStyle='#ffffff';x.font='500 33px Inter,sans-serif';
+    const ny=wrap(x,b.a,70,y+42,940,42,5);
+    y=Math.max(ny+34,y+120);
+  });
+  // footer
+  x.fillStyle='rgba(255,255,255,.45)';x.font='500 24px Inter,sans-serif';
+  x.fillText('Del aprendizaje a la transformación · una visión de futuro con IA',70,H-96);
+  x.fillStyle='#19d3c5';x.font='700 24px Inter,sans-serif';
+  x.fillText('Universidad EAN  ×  Instituto Nacional de Cancerología',70,H-60);
+}
+function downloadCard(){
+  const c=document.getElementById('cardCanvas');
+  const a=document.createElement('a');
+  a.download='Hoja-de-Ruta-2030-'+(state.nombre||'directivo').replace(/\s+/g,'-')+'.png';
+  a.href=c.toDataURL('image/png');a.click();
+}
+</script>
+</body>
+</html>
