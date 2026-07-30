@@ -151,7 +151,7 @@ function getKey(){if(EMBED_KEY)return EMBED_KEY;try{return localStorage.getItem(
 function setKey(k){try{localStorage.setItem("icone_gemini_key",k)}catch(e){}}
 
 async function callGemini(prompt,sys){
-  const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.75,maxOutputTokens:1600}};
+  const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.75,maxOutputTokens:4096}};
   if(sys)body.systemInstruction={parts:[{text:sys}]};
   const list=workingModel?[workingModel]:MODELS;let last="";
   for(const m of list){
