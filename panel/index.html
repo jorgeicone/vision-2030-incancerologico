@@ -150,24 +150,31 @@ const EMBED_KEY=(function(){try{return atob("QVEuQWI4Uk42SWZtWXRwZDQ2d1VSWmQ5OWx
 function getKey(){if(EMBED_KEY)return EMBED_KEY;try{return localStorage.getItem("icone_gemini_key")||""}catch(e){return""}}
 function setKey(k){try{localStorage.setItem("icone_gemini_key",k)}catch(e){}}
 
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function callGemini(prompt,sys){
   const body={contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.75,maxOutputTokens:4096}};
   if(sys)body.systemInstruction={parts:[{text:sys}]};
-  const list=workingModel?[workingModel]:MODELS;let last="";
+  const list=workingModel?[workingModel].concat(MODELS.filter(m=>m!==workingModel)):MODELS.slice();
+  let last="";
   for(const m of list){
-    try{
-      const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{
-        method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":getKey()},body:JSON.stringify(body)});
-      if(!r.ok){const t=await r.text();
+    for(let a=0;a<3;a++){
+      try{
+        const r=await fetch("https://generativelanguage.googleapis.com/v1beta/models/"+m+":generateContent",{
+          method:"POST",headers:{"Content-Type":"application/json","x-goog-api-key":getKey()},body:JSON.stringify(body)});
+        if(r.ok){
+          const d=await r.json();const txt=d?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("")||"";
+          if(!txt){last="vacío";break;}
+          workingModel=m;return txt;
+        }
+        const t=await r.text();
         if(r.status===400&&/API key not valid|API_KEY_INVALID/i.test(t))throw{fatal:1,msg:"La clave de Gemini no es válida."};
-        if(r.status===429)throw{fatal:1,msg:"Límite gratuito alcanzado. Espera un momento e intenta de nuevo."};
-        last="HTTP "+r.status;continue;}
-      const d=await r.json();const txt=d?.candidates?.[0]?.content?.parts?.map(p=>p.text).join("")||"";
-      if(!txt){last="vacío";continue;}
-      workingModel=m;return txt;
-    }catch(e){if(e&&e.fatal)throw e;last=e.message||String(e);}
+        last="HTTP "+r.status;
+        if(r.status===429||r.status>=500){await sleep(700*(a+1));continue;}
+        break;
+      }catch(e){if(e&&e.fatal)throw e;last=e.message||String(e);await sleep(500);}
+    }
   }
-  throw{msg:"No se pudo conectar con la IA ("+last+")."};
+  throw{msg:"La IA está muy ocupada ("+last+"). Espera unos segundos y toca Reintentar."};
 }
 
 function openVision(){
