@@ -146,7 +146,8 @@ function setTab(k){tab=k;document.querySelectorAll('.tab').forEach(t=>t.classLis
 /* ===== GEMINI VISIÓN ===== */
 const MODELS=["gemini-flash-latest","gemini-2.5-flash","gemini-2.0-flash","gemini-1.5-flash"];
 let workingModel=null;
-function getKey(){try{return localStorage.getItem("icone_gemini_key")||""}catch(e){return""}}
+const EMBED_KEY=(function(){try{return atob("QVEuQWI4Uk42SWZtWXRwZDQ2d1VSWmQ5OWxnVndEc2hrcmhIUFVjNmxjMHkyRTVxNTJ6WlE=")}catch(e){return""}})();
+function getKey(){if(EMBED_KEY)return EMBED_KEY;try{return localStorage.getItem("icone_gemini_key")||""}catch(e){return""}}
 function setKey(k){try{localStorage.setItem("icone_gemini_key",k)}catch(e){}}
 
 async function callGemini(prompt,sys){
